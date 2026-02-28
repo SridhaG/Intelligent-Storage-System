@@ -1,0 +1,17 @@
+# Intelligent Deduplication System Ignore List
+
+# Storage and Uploads (Temporary data)
+storage/
+uploads/
+reconstructed_*
+test.dat
+metadata.json
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS artifacts
+.DS_Store
+Thumbs.db

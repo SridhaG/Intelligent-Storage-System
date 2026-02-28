@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Deduplication System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --bg: #020617;
+            --card: #0f172a;
+            --border: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
+            transform: translateY(-4px);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .upload-section {
+            background: var(--card);
+            border: 2px dashed var(--border);
+            border-radius: 20px;
+            padding: 60px;
+            text-align: center;
+            margin-bottom: 48px;
+            transition: border-color 0.3s;
+            cursor: pointer;
+        }
+
+        .upload-section:hover {
+            border-color: var(--primary);
+        }
+
+        #fileInput { display: none; }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.9; }
+
+        .file-list {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 20px 24px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: rgba(255,255,255,0.02);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .restore-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .restore-link:hover { text-decoration: underline; }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 3px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Intelligent Storage Engine</h1>
+            <p style="color: var(--text-muted)">Block-level deduplication with SHA-256 fingerprinting</p>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Logical Capacity</div>
+                <div id="logical-size" class="stat-value">0.0 KB</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Physical Stored</div>
+                <div id="actual-size" class="stat-value">0.0 KB</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Saved Space</div>
+                <div id="saved-size" class="stat-value">0.0 KB</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Dedup Ratio</div>
+                <div id="efficiency" class="stat-value">0.0%</div>
+                <div class="progress-container">
+                    <div id="efficiency-bar" class="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-section" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput">
+            <p style="font-size: 1.2rem; margin-bottom: 10px;">Drop files here or click to upload</p>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">The system will automatically deduplicate and store based on 4KB blocks</p>
+        </div>
+
+        <div class="file-list">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>Blocks</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="fileTableBody">
+                    <!-- Dynamic files -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function fetchStats() {
+            const resp = await fetch('/api/stats');
+            const data = await resp.json();
+            
+            document.getElementById('logical-size').innerText = (data.logical / 1024).toFixed(2) + ' KB';
+            document.getElementById('actual-size').innerText = (data.actual / 1024).toFixed(2) + ' KB';
+            document.getElementById('saved-size').innerText = (data.saved / 1024).toFixed(2) + ' KB';
+            document.getElementById('efficiency').innerText = data.efficiency.toFixed(1) + '%';
+            document.getElementById('efficiency-bar').style.width = data.efficiency + '%';
+
+            const tbody = document.getElementById('fileTableBody');
+            tbody.innerHTML = data.files.map(f => `
+                <tr>
+                    <td>${f.name}</td>
+                    <td>${f.chunks}</td>
+                    <td><span style="color: var(--success)">● Optimized</span></td>
+                    <td><a href="/api/download/${f.name}" class="restore-link">Restore File</a></td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('fileInput').onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const resp = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (resp.ok) {
+                fetchStats();
+            } else {
+                const res = await resp.json();
+                alert(res.message || "Upload failed");
+            }
+        };
+
+        fetchStats();
+        setInterval(fetchStats, 5000);
+    </script>
+</body>
+</html>
